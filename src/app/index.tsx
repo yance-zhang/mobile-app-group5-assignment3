@@ -1,98 +1,151 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from "react";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+type EmployeeFormState = {
+  fullName: string;
+  email: string;
+  phone: string;
+  position: string;
+  postalCode: string;
+};
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+const defaultForm: EmployeeFormState = {
+  fullName: "",
+  email: "",
+  phone: "",
+  position: "",
+  postalCode: "",
+};
+
+export default function EmployeeFormScreen() {
+  const [form, setForm] = useState<EmployeeFormState>(defaultForm);
+
+  const handleChange = (key: keyof EmployeeFormState, value: string) => {
+    setForm((previous) => ({ ...previous, [key]: value }));
+  };
+
+  const handleSubmit = () => {
+    Alert.alert("Employee form submitted", JSON.stringify(form, null, 2));
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.card}>
+          <Text style={styles.title}>Employee Information</Text>
+          <Text style={styles.subtitle}>
+            Basic form skeleton for Assignment 3.
+          </Text>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+          <TextInput
+            value={form.fullName}
+            onChangeText={(text) => handleChange("fullName", text)}
+            placeholder="Full name"
+            style={styles.input}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <TextInput
+            value={form.email}
+            onChangeText={(text) => handleChange("email", text)}
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
+          />
+
+          <TextInput
+            value={form.phone}
+            onChangeText={(text) => handleChange("phone", text)}
+            placeholder="Phone"
+            keyboardType="phone-pad"
+            style={styles.input}
+          />
+
+          <TextInput
+            value={form.position}
+            onChangeText={(text) => handleChange("position", text)}
+            placeholder="Position"
+            style={styles.input}
+          />
+
+          <TextInput
+            value={form.postalCode}
+            onChangeText={(text) => handleChange("postalCode", text)}
+            placeholder="Postal code"
+            autoCapitalize="characters"
+            style={styles.input}
+          />
+
+          <Pressable onPress={handleSubmit} style={styles.button}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  keyboardAvoidingView: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  contentContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 16,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  card: {
+    gap: 12,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 12,
+    padding: 16,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: "700",
   },
-  code: {
-    textTransform: 'uppercase',
+  subtitle: {
+    fontSize: 14,
+    color: "#4b5563",
+    marginBottom: 4,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  input: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: "#ffffff",
+  },
+  button: {
+    marginTop: 4,
+    backgroundColor: "#111827",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
