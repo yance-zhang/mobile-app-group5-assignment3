@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -10,31 +11,46 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { z } from "zod";
 
-type EmployeeFormState = {
-  fullName: string;
-  email: string;
-  phone: string;
-  position: string;
-  postalCode: string;
-};
+const employeeSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, "Full name must be at least 2 characters")
+    .max(50, "Full name must be 50 characters or less"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .regex(/^[0-9+\-()\s]{7,20}$/, "Phone number format is invalid"),
+  position: z
+    .string()
+    .min(2, "Position must be at least 2 characters")
+    .max(40, "Position must be 40 characters or less"),
+  postalCode: z
+    .string()
+    .regex(/^[A-Za-z0-9\s-]{3,10}$/, "Postal code format is invalid"),
+});
 
-const defaultForm: EmployeeFormState = {
-  fullName: "",
-  email: "",
-  phone: "",
-  position: "",
-  postalCode: "",
-};
+type EmployeeFormState = z.infer<typeof employeeSchema>;
 
 export default function EmployeeFormScreen() {
-  const [form, setForm] = useState<EmployeeFormState>(defaultForm);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<EmployeeFormState>({
+    resolver: zodResolver(employeeSchema),
+    mode: "onBlur",
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      position: "",
+      postalCode: "",
+    },
+  });
 
-  const handleChange = (key: keyof EmployeeFormState, value: string) => {
-    setForm((previous) => ({ ...previous, [key]: value }));
-  };
-
-  const handleSubmit = () => {
+  const onSubmit = (form: EmployeeFormState) => {
     Alert.alert("Employee form submitted", JSON.stringify(form, null, 2));
   };
 
@@ -50,49 +66,111 @@ export default function EmployeeFormScreen() {
         <View style={styles.card}>
           <Text style={styles.title}>Employee Information</Text>
           <Text style={styles.subtitle}>
-            Basic form skeleton for Assignment 3.
+            Employee form with React Hook Form + Zod validation.
           </Text>
 
-          <TextInput
-            value={form.fullName}
-            onChangeText={(text) => handleChange("fullName", text)}
-            placeholder="Full name"
-            style={styles.input}
+          <Text style={styles.label}>Full name</Text>
+          <Controller
+            control={control}
+            name="fullName"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Full name"
+                style={[styles.input, errors.fullName && styles.inputError]}
+              />
+            )}
           />
+          {!!errors.fullName && (
+            <Text style={styles.errorText}>{errors.fullName.message}</Text>
+          )}
 
-          <TextInput
-            value={form.email}
-            onChangeText={(text) => handleChange("email", text)}
-            placeholder="Email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={styles.input}
+          <Text style={styles.label}>Email</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={[styles.input, errors.email && styles.inputError]}
+              />
+            )}
           />
+          {!!errors.email && (
+            <Text style={styles.errorText}>{errors.email.message}</Text>
+          )}
 
-          <TextInput
-            value={form.phone}
-            onChangeText={(text) => handleChange("phone", text)}
-            placeholder="Phone"
-            keyboardType="phone-pad"
-            style={styles.input}
+          <Text style={styles.label}>Phone</Text>
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Phone"
+                keyboardType="phone-pad"
+                style={[styles.input, errors.phone && styles.inputError]}
+              />
+            )}
           />
+          {!!errors.phone && (
+            <Text style={styles.errorText}>{errors.phone.message}</Text>
+          )}
 
-          <TextInput
-            value={form.position}
-            onChangeText={(text) => handleChange("position", text)}
-            placeholder="Position"
-            style={styles.input}
+          <Text style={styles.label}>Position</Text>
+          <Controller
+            control={control}
+            name="position"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Position"
+                style={[styles.input, errors.position && styles.inputError]}
+              />
+            )}
           />
+          {!!errors.position && (
+            <Text style={styles.errorText}>{errors.position.message}</Text>
+          )}
 
-          <TextInput
-            value={form.postalCode}
-            onChangeText={(text) => handleChange("postalCode", text)}
-            placeholder="Postal code"
-            autoCapitalize="characters"
-            style={styles.input}
+          <Text style={styles.label}>Postal code</Text>
+          <Controller
+            control={control}
+            name="postalCode"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Postal code"
+                autoCapitalize="characters"
+                style={[styles.input, errors.postalCode && styles.inputError]}
+              />
+            )}
           />
+          {!!errors.postalCode && (
+            <Text style={styles.errorText}>{errors.postalCode.message}</Text>
+          )}
 
-          <Pressable onPress={handleSubmit} style={styles.button}>
+          <Pressable
+            onPress={handleSubmit(onSubmit)}
+            disabled={!isValid || isSubmitting}
+            style={[
+              styles.button,
+              (!isValid || isSubmitting) && styles.buttonDisabled,
+            ]}
+          >
             <Text style={styles.buttonText}>Submit</Text>
           </Pressable>
         </View>
@@ -127,6 +205,12 @@ const styles = StyleSheet.create({
     color: "#4b5563",
     marginBottom: 4,
   },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: -4,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#d1d5db",
@@ -136,12 +220,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#ffffff",
   },
+  inputError: {
+    borderColor: "#dc2626",
+    backgroundColor: "#fef2f2",
+  },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 12,
+    marginTop: -6,
+  },
   button: {
     marginTop: 4,
     backgroundColor: "#111827",
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
     color: "#ffffff",
