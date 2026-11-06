@@ -17,6 +17,10 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="person.2" md="group" />
         <NativeTabs.Trigger.Label>Employee</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="signin">
+        <NativeTabs.Trigger.Icon sf="person.crop.circle" md="login" />
+        <NativeTabs.Trigger.Label>Sign In</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
