@@ -27,6 +27,9 @@ export default function AppTabs() {
           <TabTrigger name="signin" href="/signin" asChild>
             <TabButton>Sign In</TabButton>
           </TabTrigger>
+          <TabTrigger name="signup" href={"/signup" as any} asChild>
+            <TabButton>Sign Up</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>
